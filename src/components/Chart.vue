@@ -8,7 +8,9 @@
       :axis="axis">
       <template #layers>
         <Grid strokeDasharray="2,2" />
-        <Line :dataKeys="['CountryCode', 'TotalConfirmed']" :lineStyle="{ stroke: 'red' }" type="monotone" />
+        <Line :dataKeys="['Country', 'TotalConfirmed']" :lineStyle="{ stroke: 'red' }" type="monotone" />
+        <Line :dataKeys="['Country', 'TotalDeaths']" :lineStyle="{ stroke: 'green' }" type="monotone" />
+
         <!-- <Line :dataKeys="['name', 'avg']" :lineStyle="{ stroke: 'red' }" type="step" /> -->
       </template>
     </Chart>
@@ -17,42 +19,27 @@
 </template>
 
 <script>
-import { defineComponent, ref } from 'vue'
+import { defineComponent, ref, reactive } from 'vue'
 import { Chart, Grid, Line } from 'vue3-charts'
 
-export default defineComponent({
+export default {
   name: 'LineChart',
-    data () {
-    return {
-    countryName: [],
-    numOfInfected: [],
-    }
-  },
   components: { Chart, Grid, Line },
-  props: ['countries', 'min', 'max'],   
-  methods: {
-    getCountryAndInfected() {
-    this.countryName = [];
-    this.numOfInfected = [];
-
-    this.countries.map((countriesName) => this.countryName.push(countriesName.Country));
-    this.countries.map((numInfected) => this.numOfInfected.push(numInfected.TotalConfirmed));
-    },
-  },
-  computed: {
-     
-  },
-  created(){
-    this.getCountryAndInfected();
-  },
-  setup() {
-    const direction = ref('horizontal')
-    const margin = ref({
+  props: {
+    min: Number,
+    max: Number,
+    countries: Array,
+  },   
+  setup(props) {
+    const direction = ref('horizontal');
+    const countryName = ref([]);
+    const numOfInfected = ref([]);
+    const margin = reactive({
       left: 0,
       top: 10,
       right: 20,
       bottom: 0
-    })
+    });
 
     const axis = ref({
       primary: {
@@ -69,8 +56,18 @@ export default defineComponent({
         type: 'linear',
         ticks: 8
       }
-    })
+    });
+    
+    function getCountryAndInfected() {
+      countryName.value = [];
+      numOfInfected.value = [];
+      props.countries.map((countriesName) => countryName.value.push(countriesName.Country));
+      props.countries.map((numInfected) => numOfInfected.value.push(numInfected.TotalConfirmed));
+    };
+
+      getCountryAndInfected();
+
     return { direction, margin, axis }
   }
-})
+}
 </script>
